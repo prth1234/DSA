@@ -23,7 +23,7 @@ export default function DashboardHeader() {
         </SpaceBetween>
       }
     >
-      Dashboard
+      Data Structures and Algorithms
     </Header>
   );
 }
