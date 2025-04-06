@@ -187,7 +187,7 @@ const DSATracker = () => {
   
         </Button>
       ),
-      width: 120
+      width: 
     },
     {
       id: "difficulty",
@@ -231,7 +231,7 @@ const DSATracker = () => {
       header: "LeetCode",
       cell: (item) => (
         item.questionLink ? (
-          <Link href={item.questionLink} external>
+          <Link href={item.questionLink}>
             <TbBrandLeetcode size={20} style={{ verticalAlign: 'middle' }} />
           </Link>
         ) : null
@@ -243,7 +243,7 @@ const DSATracker = () => {
       header: "GFG",
       cell: (item) => (
         item.gfgLink ? (
-          <Link href={item.gfgLink} external>
+          <Link href={item.gfgLink}>
             <SiGeeksforgeeks size={18} style={{ verticalAlign: 'middle' }} />
           </Link>
         ) : null
@@ -255,8 +255,8 @@ const DSATracker = () => {
       header: "YouTube",
       cell: (item) => (
         item.youtubeLink ? (
-          <Link href={item.youtubeLink} external>
-            <FaYoutube size={18} style={{ verticalAlign: 'middle', color: '#FF0000' }} />
+          <Link href={item.youtubeLink}>
+            <FaYoutube size={18} style={{ verticalAlign: 'middle' }} />
           </Link>
         ) : null
       ),
