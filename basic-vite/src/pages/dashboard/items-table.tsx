@@ -1,113 +1,69 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
+  Button,
+  Checkbox,
   Container,
   Header,
   Icon,
   Link,
+  Modal,
   SpaceBetween,
-  StatusIndicator,
   Table,
   TextFilter,
 } from "@cloudscape-design/components";
+import { RiAiGenerate2 } from "react-icons/ri";
+import { TbBrandLeetcode } from "react-icons/tb";
+import { SiGeeksforgeeks } from "react-icons/si";
+import { FaYoutube } from "react-icons/fa";
+
+import { defaultData } from './defaultData';
+import CodeEditor from './code-editor';
 
 const DSATracker = () => {
-  // Include the initialData inside the component for now
-  // This will be moved to an external file later
-  const defaultData = [
-    {
-      topic: "Basics",
-      subtopics: [
-        {
-          title: "Time and Space Complexity",
-          questions: [
-            {
-              id: "BASICS_1",
-              name: "What is Time Complexity?",
-              problemLink: "https://example.com/time-complexity",
-              questionLink: "https://leetcode.com/problem-set/time-complexity",
-              gfgLink: "https://practice.geeksforgeeks.org/problems/time-complexity",
-              youtubeLink: "https://youtube.com/watch?v=xyz123",
-              needCode: true,
-              difficulty: "Easy",
-              starred: true,
-              revisionNeeded: false,
-              status: "Done",
-              note: ""
-            },
-            {
-              id: "BASICS_2",
-              name: "What is Space Complexity?",
-              problemLink: "",
-              questionLink: "",
-              gfgLink: "",
-              youtubeLink: "",
-              needCode: false,
-              difficulty: "Easy",
-              starred: false,
-              revisionNeeded: false,
-              status: "Not Started",
-              note: ""
-            }
-          ]
-        }
-      ]
-    },
-    {
-      topic: "Arrays",
-      subtopics: [
-        {
-          title: "Basic Array Problems",
-          questions: [
-            {
-              id: "ARR_1",
-              name: "Find the Largest Element",
-              problemLink: "https://leetcode.com/problems/largest-element/",
-              questionLink: "https://leetcode.com/problems/largest-element/",
-              gfgLink: "https://practice.geeksforgeeks.org/problems/largest-element-in-array4009",
-              youtubeLink: "https://youtube.com/watch?v=abc456",
-              needCode: true,
-              difficulty: "Easy",
-              starred: false,
-              revisionNeeded: true,
-              status: "In Progress",
-              note: ""
-            },
-            {
-              id: "ARR_2",
-              name: "Check if Array is Sorted",
-              problemLink: "",
-              questionLink: "",
-              gfgLink: "",
-              youtubeLink: "",
-              needCode: false,
-              difficulty: "Medium",
-              starred: true,
-              revisionNeeded: false,
-              status: "Not Started",
-              note: "Watch NeetCode solution"
-            }
-          ]
-        }
-      ]
+  // Load data from localStorage or use defaultData
+  const loadInitialData = () => {
+    const savedData = localStorage.getItem('dsaTrackerData');
+    if (savedData) {
+      return JSON.parse(savedData);
+    } else {
+      // Initialize with starred set to false for all questions
+      const initialData = defaultData.map(topic => ({
+        ...topic,
+        subtopics: topic.subtopics.map(subtopic => ({
+          ...subtopic,
+          questions: subtopic.questions.map(question => ({
+            ...question,
+            starred: false
+          }))
+        }))
+      }));
+      return initialData;
     }
-  ];
+  };
 
   // State variables
-  const [dsaData, setDsaData] = useState(defaultData);
+  const [dsaData, setDsaData] = useState(loadInitialData);
+  const [filterText, setFilterText] = useState("");
+  const [noteModalVisible, setNoteModalVisible] = useState(false);
+  const [currentNote, setCurrentNote] = useState("");
+  const [currentQuestionId, setCurrentQuestionId] = useState(null);
   
   // State for tracking expanded sections
   const [expandedTopics, setExpandedTopics] = useState({
-    "Basics": true,  // Pre-expand Basics section
-    "Arrays": true,  // Pre-expand Arrays section
+    "Basics": true,
+    "Arrays": true,
   });
   
   const [expandedSubtopics, setExpandedSubtopics] = useState({
-    "Basics-Time and Space Complexity": true,  // Pre-expand this subtopic
-    "Arrays-Basic Array Problems": true,       // Pre-expand this subtopic
+    "Basics-Time and Space Complexity": true,
+    "Arrays-Basic Array Problems": true,
   });
-  
-  const [filterText, setFilterText] = useState("");
+
+  // Save to localStorage whenever data changes
+  useEffect(() => {
+    localStorage.setItem('dsaTrackerData', JSON.stringify(dsaData));
+  }, [dsaData]);
 
   // Function to toggle expansion of topics
   const toggleTopic = (topicName) => {
@@ -126,118 +82,198 @@ const DSATracker = () => {
     }));
   };
 
+  // Function to update question status
+  const updateQuestionStatus = (questionId, isChecked) => {
+    const newData = dsaData.map(topic => ({
+      ...topic,
+      subtopics: topic.subtopics.map(subtopic => ({
+        ...subtopic,
+        questions: subtopic.questions.map(question => 
+          question.id === questionId 
+            ? { ...question, status: isChecked ? "Done" : "Not Started" } 
+            : question
+        )
+      }))
+    }));
+    
+    setDsaData(newData);
+  };
+
+  // Function to toggle star status
+  const toggleStarred = (questionId) => {
+    const newData = dsaData.map(topic => ({
+      ...topic,
+      subtopics: topic.subtopics.map(subtopic => ({
+        ...subtopic,
+        questions: subtopic.questions.map(question => 
+          question.id === questionId 
+            ? { ...question, starred: !question.starred } 
+            : question
+        )
+      }))
+    }));
+    
+    setDsaData(newData);
+  };
+
+  // Function to open note modal
+  const openNoteModal = (questionId, note) => {
+    setCurrentQuestionId(questionId);
+    setCurrentNote(note || "");
+    setNoteModalVisible(true);
+  };
+
+  // Function to save note
+  const saveNote = () => {
+    const newData = dsaData.map(topic => ({
+      ...topic,
+      subtopics: topic.subtopics.map(subtopic => ({
+        ...subtopic,
+        questions: subtopic.questions.map(question => 
+          question.id === currentQuestionId 
+            ? { ...question, note: currentNote } 
+            : question
+        )
+      }))
+    }));
+    
+    setDsaData(newData);
+    setNoteModalVisible(false);
+  };
+
   // Define the table columns for questions
   const questionColumns = [
     {
+      id: "status",
+      header: "Status",
+      cell: (item) => (
+        <Checkbox
+          checked={item.status === "Done"}
+          onChange={({ detail }) => 
+            updateQuestionStatus(item.id, detail.checked)
+          }
+        />
+      ),
+      width: 100
+    },
+    {
       id: "name",
-      header: "Problem Name",
+      header: "Problem",
       cell: (item) => (
         <Link href={item.problemLink || "#"} external={!!item.problemLink}>
           {item.name}
         </Link>
       ),
-      sortingField: "name",
-      width: 250
+      width: 300
     },
     {
-      id: "status",
-      header: "Status",
-      cell: (item) => {
-        const statusMap = {
-          "Not Started": { type: "pending", label: "Not Started" },
-          "In Progress": { type: "in-progress", label: "In Progress" },
-          "Done": { type: "success", label: "Done" }
-        };
-        const status = statusMap[item.status] || statusMap["Not Started"];
-        return <StatusIndicator type={status.type}>{status.label}</StatusIndicator>;
-      },
-      sortingField: "status",
+      id: "notes",
+      header: "Notes",
+      cell: (item) => (
+        <Button
+          variant="icon"
+          iconName="file-open"
+          onClick={() => openNoteModal(item.id, item.note)}
+        />
+      ),
+      width: 100
+    },
+    {
+      id: "solution",
+      header: "Generate",
+      cell: () => (
+        <Button variant="normal">
+          <RiAiGenerate2 size={18} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+  
+        </Button>
+      ),
       width: 120
     },
     {
       id: "difficulty",
       header: "Difficulty",
       cell: (item) => {
+        const difficulty = item.difficulty || "Medium";
         const difficultyColor = {
           "Easy": "green",
-          "Medium": "orange",
+          "Medium": "#f2a200", // yellow
           "Hard": "red"
         };
         return (
-          <Box color={difficultyColor[item.difficulty] || "grey"}>
-            {item.difficulty}
+          <Box 
+            color={difficultyColor[difficulty] || "grey"}
+            style={{ 
+              padding: '2px 8px', 
+              borderRadius: '4px', 
+              backgroundColor: `${difficultyColor[difficulty]}20`,
+              display: 'inline-block',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {difficulty}
           </Box>
         );
       },
-      sortingField: "difficulty",
-      width: 100
-    },
-    {
-      id: "needCode",
-      header: "Code Required",
-      cell: (item) => (
-        item.needCode ? "Yes" : "No"
-      ),
-      sortingField: "needCode",
       width: 120
     },
     {
-      id: "links",
-      header: "Resources",
-      cell: (item) => (
-        <SpaceBetween direction="horizontal" size="xs">
-          {item.questionLink && (
-            <Link href={item.questionLink} external>
-              <Icon name="external" /> LeetCode
-            </Link>
-          )}
-          {item.gfgLink && (
-            <Link href={item.gfgLink} external>
-              <Icon name="external" /> GFG
-            </Link>
-          )}
-          {item.youtubeLink && (
-            <Link href={item.youtubeLink} external>
-              <Icon name="video" /> Tutorial
-            </Link>
-          )}
-        </SpaceBetween>
-      ),
-      width: 250
-    },
-    {
-      id: "starred",
-      header: "Starred",
-      cell: (item) => (
-        item.starred ? 
-        <Box color="orange"><Icon name="star-filled" /> Starred</Box> : 
-        ""
-      ),
-      sortingField: "starred",
+      id: "level",
+      header: "Level",
+      cell: (item) => {
+        // Extract level if it exists, or assign default
+        const level = item.level || "L1";
+        return level;
+      },
       width: 100
     },
     {
-      id: "revision",
-      header: "Revision Needed",
+      id: "leetcode",
+      header: "LeetCode",
       cell: (item) => (
-        item.revisionNeeded ? 
-        <Box color="red"><Icon name="refresh" /> Needs Review</Box> : 
-        ""
+        item.questionLink ? (
+          <Link href={item.questionLink} external>
+            <TbBrandLeetcode size={20} style={{ verticalAlign: 'middle' }} />
+          </Link>
+        ) : null
       ),
-      sortingField: "revisionNeeded",
-      width: 150
+      width: 110
     },
     {
-      id: "notes",
-      header: "Notes",
+      id: "gfg",
+      header: "GFG",
       cell: (item) => (
-        item.note ? 
-        <Box>
-          <Icon name="file" /> {item.note.substring(0, 30)}{item.note.length > 30 ? "..." : ""}
-        </Box> : 
-        ""
+        item.gfgLink ? (
+          <Link href={item.gfgLink} external>
+            <SiGeeksforgeeks size={18} style={{ verticalAlign: 'middle' }} />
+          </Link>
+        ) : null
       ),
-      width: 200
+      width: 110
+    },
+    {
+      id: "youtube",
+      header: "YouTube",
+      cell: (item) => (
+        item.youtubeLink ? (
+          <Link href={item.youtubeLink} external>
+            <FaYoutube size={18} style={{ verticalAlign: 'middle', color: '#FF0000' }} />
+          </Link>
+        ) : null
+      ),
+      width: 110
+    },
+    {
+      id: "starred",
+      header: "Important",
+      cell: (item) => (
+        <Button
+          variant="icon"
+          iconName={item.starred ? "star-filled" : "star"}
+          onClick={() => toggleStarred(item.id)}
+          iconAlt={item.starred ? "Marked Important" : "Mark as Important"}
+        />
+      ),
+      width: 100
     }
   ];
 
@@ -264,12 +300,11 @@ const DSATracker = () => {
                 actions={
                   <SpaceBetween direction="horizontal" size="xs">
                     <Box>{`${topic.subtopics.flatMap(subtopic => subtopic.questions).length} Problems`}</Box>
-                    <Link
-                      onFollow={() => toggleTopic(topic.topic)}
-                      variant="button"
-                    >
-                      {expandedTopics[topic.topic] ? "Collapse" : "Expand"}
-                    </Link>
+                    <Button 
+                      variant="icon" 
+                      iconName={expandedTopics[topic.topic] ? "treeview-collapse" : "treeview-expand"}
+                      onClick={() => toggleTopic(topic.topic)}
+                    />
                   </SpaceBetween>
                 }
               >
@@ -294,12 +329,11 @@ const DSATracker = () => {
                           actions={
                             <SpaceBetween direction="horizontal" size="xs">
                               <Box>{`${filteredQuestions.length} Problems`}</Box>
-                              <Link
-                                onFollow={() => toggleSubtopic(topic.topic, subtopic.title)}
-                                variant="button"
-                              >
-                                {expandedSubtopics[`${topic.topic}-${subtopic.title}`] ? "Collapse" : "Expand"}
-                              </Link>
+                              <Button 
+                                variant="icon" 
+                                iconName={expandedSubtopics[`${topic.topic}-${subtopic.title}`] ? "treeview-collapse" : "treeview-expand"}
+                                onClick={() => toggleSubtopic(topic.topic, subtopic.title)}
+                              />
                             </SpaceBetween>
                           }
                         >
@@ -314,8 +348,9 @@ const DSATracker = () => {
                           variant="embedded"
                           stickyHeader
                           resizableColumns
-                          wrapLines
                           stripedRows
+                          wrapLines={false}
+                          fullWidth={true}
                         />
                       )}
                     </Container>
@@ -326,6 +361,31 @@ const DSATracker = () => {
           </Container>
         ))}
       </SpaceBetween>
+
+      {/* Note Modal */}
+      <Modal
+        visible={noteModalVisible}
+        onDismiss={() => setNoteModalVisible(false)}
+        header="Problem Notes"
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button variant="link" onClick={() => setNoteModalVisible(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={saveNote}>
+                Save
+              </Button>
+            </SpaceBetween>
+          </Box>
+        }
+        size="large"
+      >
+        <CodeEditor 
+          value={currentNote}
+          onChange={value => setCurrentNote(value)}
+        />
+      </Modal>
     </Container>
   );
 };
