@@ -19,7 +19,7 @@ import { FaYoutube } from "react-icons/fa";
 
 import { defaultData } from './defaultData';
 import EnhancedCodeEditor from './code-editor';
-
+import { FaStar, FaRegStar } from "react-icons/fa";
 const DSATracker = () => {
   // Load data from localStorage or use defaultData
   const loadInitialData = () => {
@@ -169,14 +169,27 @@ const DSATracker = () => {
     {
       id: "notes",
       header: "Notes",
-      cell: (item) => (
-        <Button
-          variant="icon"
-          iconName="file-open"
-          onClick={() => openNoteModal(item.id, item.note)}
-        />
-      ),
-      width: 100
+      cell: (item) => {
+        const hasNotes = item.note && item.note.trim();
+        return (
+          <Box display="flex" alignItems="center">
+            <Button
+              variant="icon"
+              iconName="file-open"
+              onClick={() => openNoteModal(item.id, item.note)}
+              iconAlt={hasNotes ? "View saved notes" : "Add notes"}
+            />
+            {hasNotes && (
+              <Icon
+                name="status-positive"
+                variant="success"
+                style={{ marginLeft: '-8px', marginTop: '2px' }}
+              />
+            )}
+          </Box>
+        );
+      },
+      width: 110
     },
     {
       id: "solution",
@@ -187,7 +200,7 @@ const DSATracker = () => {
   
         </Button>
       ),
-      width: 
+      width: 120
     },
     {
       id: "difficulty",
@@ -266,12 +279,9 @@ const DSATracker = () => {
       id: "starred",
       header: "Important",
       cell: (item) => (
-        <Button
-          variant="icon"
-          iconName={item.starred ? "star-filled" : "star"}
-          onClick={() => toggleStarred(item.id)}
-          iconAlt={item.starred ? "Marked Important" : "Mark as Important"}
-        />
+        <button onClick={() => toggleStarred(item.id)} style={{ background: "none", border: "none", cursor: "pointer" }}>
+        {item.starred ? <FaStar color="gold" /> : <FaRegStar />}
+      </button>
       ),
       width: 100
     }
