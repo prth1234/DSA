@@ -18,7 +18,7 @@ import { SiGeeksforgeeks } from "react-icons/si";
 import { FaYoutube } from "react-icons/fa";
 
 import { defaultData } from './defaultData';
-import CodeEditor from './code-editor';
+import EnhancedCodeEditor from './code-editor';
 
 const DSATracker = () => {
   // Load data from localStorage or use defaultData
@@ -381,10 +381,12 @@ const DSATracker = () => {
         }
         size="large"
       >
-        <CodeEditor 
-          value={currentNote}
-          onChange={value => setCurrentNote(value)}
-        />
+      
+      <EnhancedCodeEditor
+        value={currentNote}
+        onChange={value => setCurrentNote(value)}
+      />
+
       </Modal>
     </Container>
   );
