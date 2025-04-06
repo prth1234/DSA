@@ -16,10 +16,11 @@ import { RiAiGenerate2 } from "react-icons/ri";
 import { TbBrandLeetcode } from "react-icons/tb";
 import { SiGeeksforgeeks } from "react-icons/si";
 import { FaYoutube } from "react-icons/fa";
-
+import { GoFileCode } from "react-icons/go";
 import { defaultData } from './defaultData';
 import EnhancedCodeEditor from './code-editor';
 import { FaStar, FaRegStar } from "react-icons/fa";
+import { GoDotFill } from "react-icons/go";
 const DSATracker = () => {
   // Load data from localStorage or use defaultData
   const loadInitialData = () => {
@@ -172,21 +173,23 @@ const DSATracker = () => {
       cell: (item) => {
         const hasNotes = item.note && item.note.trim();
         return (
-          <Box display="flex" alignItems="center">
-            <Button
-              variant="icon"
-              iconName="file-open"
-              onClick={() => openNoteModal(item.id, item.note)}
-              iconAlt={hasNotes ? "View saved notes" : "Add notes"}
+          <button
+            onClick={() => openNoteModal(item.id, item.note)}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+            title={hasNotes ? "View saved notes" : "Add notes"}
+          >
+            <GoFileCode
+              size={20}
+              color={hasNotes ? '#2ecc71' : '#EEE'}
             />
-            {hasNotes && (
-              <Icon
-                name="status-positive"
-                variant="success"
-                style={{ marginLeft: '-8px', marginTop: '2px' }}
-              />
-            )}
-          </Box>
+          </button>
         );
       },
       width: 110
@@ -202,32 +205,53 @@ const DSATracker = () => {
       ),
       width: 120
     },
+    
+
+
     {
       id: "difficulty",
       header: "Difficulty",
       cell: (item) => {
         const difficulty = item.difficulty || "Medium";
         const difficultyColor = {
-          "Easy": "green",
-          "Medium": "#f2a200", // yellow
-          "Hard": "red"
+          Easy: "#2ecc71",
+          Medium: "#f2a200",
+          Hard: "#e74c3c"
         };
+    
+        const difficultyBgColor = {
+          Easy: "#2ecc711a",
+          Medium: "#f2a2001a",
+          Hard: "#e74c3c1a"
+        };
+    
         return (
-          <Box 
-            color={difficultyColor[difficulty] || "grey"}
-            style={{ 
-              padding: '2px 8px', 
-              borderRadius: '4px', 
-              backgroundColor: `${difficultyColor[difficulty]}20`,
-              display: 'inline-block',
-              whiteSpace: 'nowrap'
+          <Box
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '4px 10px',
+              borderRadius: '20px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: difficultyColor[difficulty],
+              backgroundColor: difficultyBgColor[difficulty],
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              border: `1px solid ${difficultyColor[difficulty]}`,
+              lineHeight: 1
             }}
           >
+            <GoDotFill
+              color={difficultyColor[difficulty]}
+              size={12}
+              style={{ marginRight: '6px', verticalAlign: 'middle' }}
+            />
             {difficulty}
           </Box>
         );
       },
-      width: 120
+      width: 140
     },
     {
       id: "level",
