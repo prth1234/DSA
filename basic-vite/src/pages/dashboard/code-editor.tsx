@@ -110,15 +110,27 @@ const CodeEditor = ({ value, onChange }) => {
 
   return (
     <div className="code-editor-wrapper">
-      <div className="language-selector">
-        <Select
-          selectedOption={languageOptions.find(option => option.value === language)}
-          onChange={({ detail }) => handleLanguageChange(detail.selectedOption)}
-          options={languageOptions}
-          selectedAriaLabel="Selected language"
-          placeholder="Select language"
-        />
-      </div>
+    <div className="language-selector">
+    <div className="language-selector">
+  <div style={{ minWidth: '120px', maxWidth: '150px' }}>
+    <Select
+      selectedOption={languageOptions.find(option => option.value === language)}
+      onChange={({ detail }) => {
+        setLanguage(detail.selectedOption.value);
+        if (editorRef.current) {
+          const model = editorRef.current.getModel();
+          if (model) {
+            monaco.editor.setModelLanguage(model, detail.selectedOption.value);
+          }
+        }
+      }}
+      options={languageOptions}
+      selectedAriaLabel="Selected language"
+      placeholder="Select language"
+    />
+  </div>
+</div>
+</div>
       <div ref={containerRef} className="monaco-editor-container"></div>
       <style jsx>{`
         .code-editor-wrapper {
