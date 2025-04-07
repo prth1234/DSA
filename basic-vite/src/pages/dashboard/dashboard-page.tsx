@@ -29,7 +29,7 @@ export default function DashboardPage() {
       content={
         <ContentLayout header={<DashboardHeader />}>
           <SpaceBetween size="l">
-            <StatisticsBlock />
+       
             <ItemsTable />
           </SpaceBetween>
         </ContentLayout>

@@ -14,6 +14,7 @@ import {
   Select,
 } from "@cloudscape-design/components";
 import { RiAiGenerate2 } from "react-icons/ri";
+import StatisticsBlock from './statistics-block';
 import { TbBrandLeetcode } from "react-icons/tb";
 import { SiGeeksforgeeks } from "react-icons/si";
 import { FaYoutube } from "react-icons/fa";
@@ -599,6 +600,7 @@ const DSATracker = () => {
         <Header variant="h1">
           DSA Problem Tracker
         </Header>
+        <StatisticsBlock dsaData={dsaData} />
 
         <Box>
           <SpaceBetween direction="horizontal" size="l">
