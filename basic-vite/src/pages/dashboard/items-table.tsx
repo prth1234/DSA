@@ -336,9 +336,8 @@ const DSATracker = () => {
       id: "solution",
       header: "Generate",
       cell: () => (
-        <Button variant="normal">
           <RiAiGenerate2 size={18} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-        </Button>
+  
       ),
       width: 120
     },
