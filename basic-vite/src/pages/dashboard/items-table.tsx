@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Button,
@@ -11,6 +11,7 @@ import {
   SpaceBetween,
   Table,
   TextFilter,
+  Select,
 } from "@cloudscape-design/components";
 import { RiAiGenerate2 } from "react-icons/ri";
 import { TbBrandLeetcode } from "react-icons/tb";
@@ -21,26 +22,72 @@ import { defaultData } from './defaultData';
 import EnhancedCodeEditor from './code-editor';
 import { FaStar, FaRegStar } from "react-icons/fa";
 import { GoDotFill } from "react-icons/go";
+
 const DSATracker = () => {
   // Load data from localStorage or use defaultData
   const loadInitialData = () => {
     const savedData = localStorage.getItem('dsaTrackerData');
     if (savedData) {
       return JSON.parse(savedData);
-    } else {
-      // Initialize with starred set to false for all questions
-      const initialData = defaultData.map(topic => ({
-        ...topic,
-        subtopics: topic.subtopics.map(subtopic => ({
-          ...subtopic,
-          questions: subtopic.questions.map(question => ({
-            ...question,
-            starred: false
-          }))
-        }))
-      }));
-      return initialData;
     }
+    
+    // If no saved data, use default data
+    const initialData = defaultData.map(topic => ({
+      ...topic,
+      subtopics: topic.subtopics.map(subtopic => ({
+        ...subtopic,
+        questions: subtopic.questions.map(question => ({
+          ...question,
+          starred: question.starred || false
+        }))
+      }))
+    }));
+    return initialData;
+  };
+
+  // Load expanded states from localStorage
+  const loadExpandedStates = () => {
+    const savedExpandedTopics = localStorage.getItem('expandedTopics');
+    const savedExpandedSubtopics = localStorage.getItem('expandedSubtopics');
+    
+    // Default to basic expanded state if nothing in localStorage
+    const defaultExpandedTopics = {
+      "Basics": true,
+      "Arrays": true,
+    };
+    
+    const defaultExpandedSubtopics = {
+      "Basics-Time and Space Complexity": true,
+      "Arrays-Basic Array Problems": true,
+    };
+    
+    return {
+      topics: savedExpandedTopics ? JSON.parse(savedExpandedTopics) : defaultExpandedTopics,
+      subtopics: savedExpandedSubtopics ? JSON.parse(savedExpandedSubtopics) : defaultExpandedSubtopics
+    };
+  };
+
+  // Define available languages
+  const languageOptions = [
+    { value: 'javascript', label: 'JavaScript' },
+    { value: 'python', label: 'Python' },
+    { value: 'java', label: 'Java' },
+    { value: 'cpp', label: 'C++' },
+    { value: 'typescript', label: 'TypeScript' },
+  ];
+
+  // Load selected language from localStorage
+  const loadSelectedLanguage = () => {
+    const savedLanguageStr = localStorage.getItem('selectedProgrammingLanguage');
+    if (savedLanguageStr) {
+      try {
+        return JSON.parse(savedLanguageStr);
+      } catch (e) {
+        console.error("Error parsing saved language", e);
+        return languageOptions[0];
+      }
+    }
+    return languageOptions[0]; // Default to first language
   };
 
   // State variables
@@ -49,22 +96,34 @@ const DSATracker = () => {
   const [noteModalVisible, setNoteModalVisible] = useState(false);
   const [currentNote, setCurrentNote] = useState("");
   const [currentQuestionId, setCurrentQuestionId] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState(loadSelectedLanguage);
   
-  // State for tracking expanded sections
-  const [expandedTopics, setExpandedTopics] = useState({
-    "Basics": true,
-    "Arrays": true,
-  });
+  // Store previous progress values for animation
+  const [progressAnimations, setProgressAnimations] = useState({});
   
-  const [expandedSubtopics, setExpandedSubtopics] = useState({
-    "Basics-Time and Space Complexity": true,
-    "Arrays-Basic Array Problems": true,
-  });
+  // Load expanded states with persistence
+  const expandedStates = loadExpandedStates();
+  const [expandedTopics, setExpandedTopics] = useState(expandedStates.topics);
+  const [expandedSubtopics, setExpandedSubtopics] = useState(expandedStates.subtopics);
 
   // Save to localStorage whenever data changes
   useEffect(() => {
     localStorage.setItem('dsaTrackerData', JSON.stringify(dsaData));
   }, [dsaData]);
+  
+  // Save expanded states to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('expandedTopics', JSON.stringify(expandedTopics));
+  }, [expandedTopics]);
+  
+  useEffect(() => {
+    localStorage.setItem('expandedSubtopics', JSON.stringify(expandedSubtopics));
+  }, [expandedSubtopics]);
+
+  // Save selected language to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('selectedProgrammingLanguage', JSON.stringify(selectedLanguage));
+  }, [selectedLanguage]);
 
   // Function to toggle expansion of topics
   const toggleTopic = (topicName) => {
@@ -83,19 +142,97 @@ const DSATracker = () => {
     }));
   };
 
-  // Function to update question status
+  // Calculate progress for a subtopic
+  const calculateProgress = (questions) => {
+    if (questions.length === 0) return 0;
+    const completedQuestions = questions.filter(q => q.status === "Done").length;
+    return (completedQuestions / questions.length) * 100;
+  };
+
+  // Calculate progress for an entire topic
+  const calculateTopicProgress = (topic) => {
+    const allQuestions = topic.subtopics.flatMap(subtopic => subtopic.questions);
+    return calculateProgress(allQuestions);
+  };
+
+  // Function to update question status with animation
   const updateQuestionStatus = (questionId, isChecked) => {
-    const newData = dsaData.map(topic => ({
-      ...topic,
-      subtopics: topic.subtopics.map(subtopic => ({
-        ...subtopic,
-        questions: subtopic.questions.map(question => 
-          question.id === questionId 
-            ? { ...question, status: isChecked ? "Done" : "Not Started" } 
-            : question
-        )
-      }))
-    }));
+    // First, find which subtopic and topic this question belongs to
+    let targetSubtopicKey = null;
+    let targetTopicName = null;
+    let previousSubtopicProgress = 0;
+    let previousTopicProgress = 0;
+    
+    // Find the subtopic key and calculate previous progress
+    dsaData.forEach(topic => {
+      let foundInTopic = false;
+      
+      topic.subtopics.forEach(subtopic => {
+        const hasQuestion = subtopic.questions.some(q => q.id === questionId);
+        if (hasQuestion) {
+          const key = `${topic.topic}-${subtopic.title}`;
+          targetSubtopicKey = key;
+          targetTopicName = topic.topic;
+          previousSubtopicProgress = calculateProgress(subtopic.questions);
+          foundInTopic = true;
+        }
+      });
+      
+      if (foundInTopic) {
+        previousTopicProgress = calculateTopicProgress(topic);
+      }
+    });
+    
+    // Update the data
+    const newData = dsaData.map(topic => {
+      const updatedTopic = {
+        ...topic,
+        subtopics: topic.subtopics.map(subtopic => {
+          const updatedSubtopic = {
+            ...subtopic,
+            questions: subtopic.questions.map(question => 
+              question.id === questionId 
+                ? { ...question, status: isChecked ? "Done" : "Not Started" } 
+                : question
+            )
+          };
+          
+          // If this is the affected subtopic, update animation state
+          if (targetSubtopicKey === `${topic.topic}-${subtopic.title}`) {
+            const newProgress = calculateProgress(updatedSubtopic.questions);
+            
+            // Store animation values for subtopic
+            setProgressAnimations(prev => ({
+              ...prev,
+              [targetSubtopicKey]: {
+                from: previousSubtopicProgress,
+                to: newProgress,
+                timestamp: Date.now()
+              }
+            }));
+          }
+          
+          return updatedSubtopic;
+        })
+      };
+      
+      // If this is the affected topic, update animation state for topic progress
+      if (topic.topic === targetTopicName) {
+        const newTopicProgress = calculateTopicProgress(updatedTopic);
+        
+        // Store animation values for topic
+        setProgressAnimations(prev => ({
+          ...prev,
+          [topic.topic]: {
+            from: previousTopicProgress,
+            to: newTopicProgress,
+            timestamp: Date.now()
+          }
+        }));
+      }
+      
+      return updatedTopic;
+    });
     
     setDsaData(newData);
   };
@@ -161,7 +298,7 @@ const DSATracker = () => {
       id: "name",
       header: "Problem",
       cell: (item) => (
-        <Link href={item.problemLink || "#"} external={!!item.problemLink}>
+        <Link href={item.problemLink || "#"} >
           {item.name}
         </Link>
       ),
@@ -200,14 +337,10 @@ const DSATracker = () => {
       cell: () => (
         <Button variant="normal">
           <RiAiGenerate2 size={18} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-  
         </Button>
       ),
       width: 120
     },
-    
-
-
     {
       id: "difficulty",
       header: "Difficulty",
@@ -268,7 +401,7 @@ const DSATracker = () => {
       header: "LeetCode",
       cell: (item) => (
         item.questionLink ? (
-          <Link href={item.questionLink}>
+          <Link href={item.questionLink} >
             <TbBrandLeetcode size={20} style={{ verticalAlign: 'middle' }} />
           </Link>
         ) : null
@@ -280,7 +413,7 @@ const DSATracker = () => {
       header: "GFG",
       cell: (item) => (
         item.gfgLink ? (
-          <Link href={item.gfgLink}>
+          <Link href={item.gfgLink} >
             <SiGeeksforgeeks size={18} style={{ verticalAlign: 'middle' }} />
           </Link>
         ) : null
@@ -292,7 +425,7 @@ const DSATracker = () => {
       header: "YouTube",
       cell: (item) => (
         item.youtubeLink ? (
-          <Link href={item.youtubeLink}>
+          <Link href={item.youtubeLink} >
             <FaYoutube size={18} style={{ verticalAlign: 'middle' }} />
           </Link>
         ) : null
@@ -304,12 +437,141 @@ const DSATracker = () => {
       header: "Important",
       cell: (item) => (
         <button onClick={() => toggleStarred(item.id)} style={{ background: "none", border: "none", cursor: "pointer" }}>
-        {item.starred ? <FaStar color="gold" /> : <FaRegStar />}
-      </button>
+          {item.starred ? <FaStar color="gold" /> : <FaRegStar />}
+        </button>
       ),
       width: 100
     }
   ];
+
+  // Enhanced Progress Bar Component with animation
+  const ProgressBar = ({ progress, progressKey, variant = "default" }) => {
+    const progressRef = useRef(null);
+    const animationRef = useRef(null);
+    const [displayProgress, setDisplayProgress] = useState(progress);
+    
+    // Check if we have animation data for this key
+    const animation = progressAnimations[progressKey];
+    
+    useEffect(() => {
+      // Clean up previous animation if it exists
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      
+      // If we have animation data and it's relatively fresh (less than 2 seconds old)
+      if (animation && Date.now() - animation.timestamp < 2000) {
+        let startTime;
+        const duration = 800; // Animation duration in ms
+        
+        const animateProgress = (timestamp) => {
+          if (!startTime) startTime = timestamp;
+          const elapsed = timestamp - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          
+          // Use easeOutCubic easing function for smooth animation
+          const easeProgress = 1 - Math.pow(1 - progress, 3);
+          
+          // Calculate current value in the animation
+          const currentValue = animation.from + (animation.to - animation.from) * easeProgress;
+          setDisplayProgress(currentValue);
+          
+          // Continue animation if not finished
+          if (progress < 1) {
+            animationRef.current = requestAnimationFrame(animateProgress);
+          } else {
+            // Ensure we reach the exact final value
+            setDisplayProgress(animation.to);
+          }
+        };
+        
+        // Start animation
+        animationRef.current = requestAnimationFrame(animateProgress);
+      } else {
+        // No animation data or too old, just use the provided progress
+        setDisplayProgress(progress);
+      }
+      
+      // Cleanup function
+      return () => {
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      };
+    }, [progress, animation]);
+    
+    // Enhanced gradient that responds to progress
+    const getProgressGradient = (value) => {
+      // Color scheme changes based on progress
+      if (value < 33) {
+        return 'linear-gradient(90deg, #F27121 0%, #F27121 100%)';
+      } else if (value < 66) {
+        return 'linear-gradient(90deg, #F27121 0%, #E94057 100%)';
+      } else {
+        return 'linear-gradient(90deg, #8A2387 0%, #E94057 50%, #F27121 100%)';
+      }
+    };
+    
+    // Different styling for topic vs subtopic progress bars
+    const barHeight = variant === "topic" ? "3px" : "2px";
+    const barMargin = variant === "topic" ? "14px" : "12px";
+    const shadowIntensity = variant === "topic" ? "0.7" : "0.6";
+    
+    return (
+      <div 
+        style={{ 
+          width: '100%', 
+          height: barHeight,
+          backgroundColor: '#f3f3f3', 
+          borderRadius: '4px',
+          marginBottom: barMargin,
+          overflow: 'hidden',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05) inset',
+          position: 'relative'
+        }}
+      >
+        <div 
+          ref={progressRef}
+          style={{
+            width: `${displayProgress}%`,
+            height: '100%',
+            background: getProgressGradient(displayProgress),
+            borderRadius: '4px',
+            transition: animation ? 'none' : 'width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            boxShadow: `0 0 8px rgba(242, 113, 33, ${shadowIntensity})`,
+            position: 'relative',
+            zIndex: 2
+          }}
+        />
+        
+        {/* Subtle pulse effect */}
+        {animation && (
+          <div 
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: `${displayProgress}%`,
+              height: '100%',
+              background: 'rgba(255, 255, 255, 0.3)',
+              filter: 'blur(4px)',
+              animation: 'pulse 1.5s ease-in-out',
+              zIndex: 1
+            }}
+          />
+        )}
+        
+        {/* Add global styles for the pulse animation */}
+        <style>{`
+          @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 0.4; }
+            100% { opacity: 0; }
+          }
+        `}</style>
+      </div>
+    );
+  };
 
   return (
     <Container>
@@ -318,82 +580,142 @@ const DSATracker = () => {
           DSA Problem Tracker
         </Header>
 
-        <TextFilter
-          filteringText={filterText}
-          filteringPlaceholder="Find problems"
-          filteringAriaLabel="Filter problems"
-          onChange={({ detail }) => setFilterText(detail.filteringText)}
-        />
+        <Box>
+          <SpaceBetween direction="horizontal" size="l">
+            <TextFilter
+              filteringText={filterText}
+              filteringPlaceholder="Find problems"
+              filteringAriaLabel="Filter problems"
+              onChange={({ detail }) => setFilterText(detail.filteringText)}
+            />
+            
+            <Select
+              selectedOption={selectedLanguage}
+              onChange={({ detail }) => setSelectedLanguage(detail.selectedOption)}
+              options={languageOptions}
+              placeholder="Select language"
+              selectedAriaLabel="Selected"
+            />
+          </SpaceBetween>
+        </Box>
 
-        {dsaData.map((topic, topicIndex) => (
-          <Container
-            key={topicIndex}
-            header={
-              <Header
-                variant="h2"
-                actions={
-                  <SpaceBetween direction="horizontal" size="xs">
-                    <Box>{`${topic.subtopics.flatMap(subtopic => subtopic.questions).length} Problems`}</Box>
-                    <Button 
-                      variant="icon" 
-                      iconName={expandedTopics[topic.topic] ? "treeview-collapse" : "treeview-expand"}
-                      onClick={() => toggleTopic(topic.topic)}
-                    />
-                  </SpaceBetween>
-                }
-              >
-                {topic.topic}
-              </Header>
-            }
-          >
-            {expandedTopics[topic.topic] && (
-              <SpaceBetween size="m">
-                {topic.subtopics.map((subtopic, subtopicIndex) => {
-                  // Filter questions based on search text
-                  const filteredQuestions = subtopic.questions.filter(q => 
-                    filterText ? q.name.toLowerCase().includes(filterText.toLowerCase()) : true
-                  );
-                  
-                  return (
-                    <Container
-                      key={subtopicIndex}
-                      header={
-                        <Header
-                          variant="h3"
-                          actions={
-                            <SpaceBetween direction="horizontal" size="xs">
-                              <Box>{`${filteredQuestions.length} Problems`}</Box>
-                              <Button 
-                                variant="icon" 
-                                iconName={expandedSubtopics[`${topic.topic}-${subtopic.title}`] ? "treeview-collapse" : "treeview-expand"}
-                                onClick={() => toggleSubtopic(topic.topic, subtopic.title)}
-                              />
-                            </SpaceBetween>
-                          }
-                        >
-                          {subtopic.title}
-                        </Header>
-                      }
-                    >
-                      {expandedSubtopics[`${topic.topic}-${subtopic.title}`] && (
-                        <Table
-                          items={filteredQuestions}
-                          columnDefinitions={questionColumns}
-                          variant="embedded"
-                          stickyHeader
-                          resizableColumns
-                          stripedRows
-                          wrapLines={false}
-                          fullWidth={true}
-                        />
-                      )}
-                    </Container>
-                  );
-                })}
-              </SpaceBetween>
-            )}
-          </Container>
-        ))}
+        {dsaData.map((topic, topicIndex) => {
+          // Calculate total progress for this topic
+          const topicProgress = calculateTopicProgress(topic);
+          const allTopicQuestions = topic.subtopics.flatMap(subtopic => subtopic.questions);
+          const completedTopicQuestions = allTopicQuestions.filter(q => q.status === "Done").length;
+          const totalTopicQuestions = allTopicQuestions.length;
+          
+          return (
+            <Container
+              key={topicIndex}
+              header={
+                <Header
+                  variant="h2"
+                  actions={
+                    <SpaceBetween direction="horizontal" size="xs">
+                      <Box>{`${completedTopicQuestions}/${totalTopicQuestions} Problems`}</Box>
+                      <Button 
+                        variant="icon" 
+                        iconName={expandedTopics[topic.topic] ? "treeview-collapse" : "treeview-expand"}
+                        onClick={() => toggleTopic(topic.topic)}
+                      />
+                    </SpaceBetween>
+                  }
+                >
+                  {topic.topic}
+                </Header>
+              }
+            >
+              {/* Add Topic-level Progress Bar */}
+              <Box padding={{ bottom: "m" }}>
+                <ProgressBar 
+                  progress={topicProgress} 
+                  progressKey={topic.topic}
+                  variant="topic"
+                />
+              </Box>
+              
+              {expandedTopics[topic.topic] && (
+                <SpaceBetween size="m">
+                  {topic.subtopics.map((subtopic, subtopicIndex) => {
+                    // Filter questions based on search text
+                    const filteredQuestions = subtopic.questions.filter(q => 
+                      filterText ? q.name.toLowerCase().includes(filterText.toLowerCase()) : true
+                    );
+                    
+                    // Calculate progress for this subtopic
+                    const progress = calculateProgress(subtopic.questions);
+                    const completedCount = subtopic.questions.filter(q => q.status === "Done").length;
+                    const totalCount = subtopic.questions.length;
+                    const subtopicKey = `${topic.topic}-${subtopic.title}`;
+                    
+                    return (
+                      <Container
+                        key={subtopicIndex}
+                        header={
+                          <Header
+                            variant="h3"
+                            actions={
+                              <SpaceBetween direction="horizontal" size="xs">
+                                <Box>{`${completedCount}/${totalCount} Problems`}</Box>
+                                <Button 
+                                  variant="icon" 
+                                  iconName={expandedSubtopics[subtopicKey] ? "treeview-collapse" : "treeview-expand"}
+                                  onClick={() => toggleSubtopic(topic.topic, subtopic.title)}
+                                />
+                              </SpaceBetween>
+                            }
+                          >
+                            {subtopic.title}
+                          </Header>
+                        }
+                      >
+                        {expandedSubtopics[subtopicKey] && (
+                          <>
+                            <Box padding={{ bottom: "m" }}>
+                              <SpaceBetween direction="vertical" size="xs">
+                                <Box display="flex" alignItems="center">
+                                  <Box flexGrow={1}>
+                                    <ProgressBar 
+                                      progress={progress} 
+                                      progressKey={subtopicKey}
+                                    />
+                                  </Box>
+                                  <Box 
+                                    paddingLeft="s" 
+                                    fontSize="body-s" 
+                                    color="text-body-secondary"
+                                    style={{
+                                      transition: "all 0.3s ease",
+                                      fontWeight: progressAnimations[subtopicKey] ? "bold" : "normal"
+                                    }}
+                                  >
+                                    {`${completedCount}/${totalCount}`}
+                                  </Box>
+                                </Box>
+                              </SpaceBetween>
+                            </Box>
+                            <Table
+                              items={filteredQuestions}
+                              columnDefinitions={questionColumns}
+                              variant="embedded"
+                              stickyHeader
+                              resizableColumns
+                              stripedRows
+                              wrapLines={false}
+                              fullWidth={true}
+                            />
+                          </>
+                        )}
+                      </Container>
+                    );
+                  })}
+                </SpaceBetween>
+              )}
+            </Container>
+          );
+        })}
       </SpaceBetween>
 
       {/* Note Modal */}
@@ -415,12 +737,11 @@ const DSATracker = () => {
         }
         size="large"
       >
-      
-      <EnhancedCodeEditor
-        value={currentNote}
-        onChange={value => setCurrentNote(value)}
-      />
-
+        <EnhancedCodeEditor
+          value={currentNote}
+          onChange={value => setCurrentNote(value)}
+          language={selectedLanguage.value} // Pass the selected language to the code editor
+        />
       </Modal>
     </Container>
   );

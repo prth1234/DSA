@@ -16,7 +16,7 @@ export default function DashboardHeader() {
                 text: "Add Item",
                 href: "/section1/add",
               },
-            ]}
+            ]}  
           >
             Add data
           </RouterButtonDropdown>
