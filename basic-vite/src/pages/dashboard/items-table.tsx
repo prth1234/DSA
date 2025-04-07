@@ -512,8 +512,8 @@ const DSATracker = () => {
       }
     };
     
-    // Different styling for topic vs subtopic progress bars
-    const barHeight = variant === "topic" ? "3px" : "2px";
+    // Make both progress bars the same height (2px)
+    const barHeight = "2px";
     const barMargin = variant === "topic" ? "14px" : "12px";
     const shadowIntensity = variant === "topic" ? "0.7" : "0.6";
     
@@ -573,6 +573,26 @@ const DSATracker = () => {
     );
   };
 
+  // Function to create a clickable header with custom styles
+  const ClickableHeader = ({ children, variant, actions, onClick }) => {
+    return (
+      <div 
+        style={{ 
+          cursor: 'pointer', 
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%'
+        }}
+        onClick={onClick}
+      >
+        <Header variant={variant} actions={actions}>
+          {children}
+        </Header>
+      </div>
+    );
+  };
+
   return (
     <Container>
       <SpaceBetween size="m">
@@ -610,21 +630,24 @@ const DSATracker = () => {
             <Container
               key={topicIndex}
               header={
-                <Header
-                  variant="h2"
-                  actions={
-                    <SpaceBetween direction="horizontal" size="xs">
-                      <Box>{`${completedTopicQuestions}/${totalTopicQuestions} Problems`}</Box>
-                      <Button 
-                        variant="icon" 
-                        iconName={expandedTopics[topic.topic] ? "treeview-collapse" : "treeview-expand"}
-                        onClick={() => toggleTopic(topic.topic)}
-                      />
-                    </SpaceBetween>
-                  }
+                <div 
+                  style={{ cursor: 'pointer', width: '100%' }} 
+                  onClick={() => toggleTopic(topic.topic)}
                 >
-                  {topic.topic}
-                </Header>
+                  <Header
+                    variant="h2"
+                    actions={
+                      <SpaceBetween direction="horizontal" size="xs">
+                        <Box>{`${completedTopicQuestions}/${totalTopicQuestions}`}</Box>
+                        <Icon
+                          name={expandedTopics[topic.topic] ? "treeview-collapse" : "treeview-expand"}
+                        />
+                      </SpaceBetween>
+                    }
+                  >
+                    {topic.topic}
+                  </Header>
+                </div>
               }
             >
               {/* Add Topic-level Progress Bar */}
@@ -654,21 +677,24 @@ const DSATracker = () => {
                       <Container
                         key={subtopicIndex}
                         header={
-                          <Header
-                            variant="h3"
-                            actions={
-                              <SpaceBetween direction="horizontal" size="xs">
-                                <Box>{`${completedCount}/${totalCount} Problems`}</Box>
-                                <Button 
-                                  variant="icon" 
-                                  iconName={expandedSubtopics[subtopicKey] ? "treeview-collapse" : "treeview-expand"}
-                                  onClick={() => toggleSubtopic(topic.topic, subtopic.title)}
-                                />
-                              </SpaceBetween>
-                            }
+                          <div 
+                            style={{ cursor: 'pointer', width: '100%' }} 
+                            onClick={() => toggleSubtopic(topic.topic, subtopic.title)}
                           >
-                            {subtopic.title}
-                          </Header>
+                            <Header
+                              variant="h3"
+                              actions={
+                                <SpaceBetween direction="horizontal" size="xs">
+                                  <Box>{`${completedCount}/${totalCount}`}</Box>
+                                  <Icon
+                                    name={expandedSubtopics[subtopicKey] ? "treeview-collapse" : "treeview-expand"}
+                                  />
+                                </SpaceBetween>
+                              }
+                            >
+                              {subtopic.title}
+                            </Header>
+                          </div>
                         }
                       >
                         {expandedSubtopics[subtopicKey] && (
