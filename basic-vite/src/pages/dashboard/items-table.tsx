@@ -99,6 +99,39 @@ const DSATracker = () => {
   const [currentQuestionId, setCurrentQuestionId] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState(loadSelectedLanguage);
   
+  // Filter state variables
+  const [starredFilter, setStarredFilter] = useState("all"); // Options: "all", "starred"
+  const [difficultyFilter, setDifficultyFilter] = useState("all"); // Options: "all", "Easy", "Medium", "Hard"
+  const [notesFilter, setNotesFilter] = useState("all"); // Options: "all", "with-notes", "without-notes"
+  const [levelFilter, setLevelFilter] = useState("all"); // Options: "all", "L1", "L2", "L3", "L4"
+
+  // Filter options
+  const starredOptions = [
+    { value: "all", label: "All Problems" },
+    { value: "starred", label: "Starred Only" },
+  ];
+
+  const difficultyOptions = [
+    { value: "all", label: "All Difficulties" },
+    { value: "Easy", label: "Easy" },
+    { value: "Medium", label: "Medium" },
+    { value: "Hard", label: "Hard" },
+  ];
+
+  const notesOptions = [
+    { value: "all", label: "All Notes" },
+    { value: "with-notes", label: "With Notes" },
+    { value: "without-notes", label: "Without Notes" },
+  ];
+
+  const levelOptions = [
+    { value: "all", label: "All Levels" },
+    { value: "L1", label: "Level 1" },
+    { value: "L2", label: "Level 2" },
+    { value: "L3", label: "Level 3" },
+    { value: "L4", label: "Level 4" },
+  ];
+  
   // Store previous progress values for animation
   const [progressAnimations, setProgressAnimations] = useState({});
   
@@ -143,9 +176,36 @@ const DSATracker = () => {
     }));
   };
 
-  const handleLanguageChange = (selectedOption) => {
-    setSelectedLanguage(selectedOption);
-    // This will trigger the useEffect that saves to localStorage
+  // Function to apply all filters
+  const applyFilters = (question) => {
+    // Text filter
+    const textMatch = filterText ? 
+      question.name.toLowerCase().includes(filterText.toLowerCase()) : 
+      true;
+    
+    // Starred filter
+    const starMatch = starredFilter === "all" ? 
+      true : 
+      (starredFilter === "starred" && question.starred);
+    
+    // Difficulty filter
+    const difficultyMatch = difficultyFilter === "all" ? 
+      true : 
+      question.difficulty === difficultyFilter;
+    
+    // Notes filter
+    const hasNotes = question.note && question.note.trim().length > 0;
+    const notesMatch = notesFilter === "all" ? 
+      true : 
+      (notesFilter === "with-notes" && hasNotes) || 
+      (notesFilter === "without-notes" && !hasNotes);
+    
+    // Level filter
+    const levelMatch = levelFilter === "all" ? 
+      true : 
+      question.level === levelFilter;
+    
+    return textMatch && starMatch && difficultyMatch && notesMatch && levelMatch;
   };
 
   // Calculate progress for a subtopic
@@ -283,6 +343,11 @@ const DSATracker = () => {
     
     setDsaData(newData);
     setNoteModalVisible(false);
+  };
+
+  // Handle language change from code editor
+  const handleLanguageChange = (selectedOption) => {
+    setSelectedLanguage(selectedOption);
   };
 
   // Define the table columns for questions
@@ -578,26 +643,6 @@ const DSATracker = () => {
     );
   };
 
-  // Function to create a clickable header with custom styles
-  const ClickableHeader = ({ children, variant, actions, onClick }) => {
-    return (
-      <div 
-        style={{ 
-          cursor: 'pointer', 
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          width: '100%'
-        }}
-        onClick={onClick}
-      >
-        <Header variant={variant} actions={actions}>
-          {children}
-        </Header>
-      </div>
-    );
-  };
-
   return (
     <Container>
       <SpaceBetween size="m">
@@ -607,16 +652,65 @@ const DSATracker = () => {
         <StatisticsBlock dsaData={dsaData} />
 
         <Box>
-          <SpaceBetween direction="horizontal" size="l">
-            <TextFilter
-              filteringText={filterText}
-              filteringPlaceholder="Find problems"
-              filteringAriaLabel="Filter problems"
-              onChange={({ detail }) => setFilterText(detail.filteringText)}
-            />
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            marginBottom: '16px'
+          }}>
+            {/* Left side - Search box */}
+            <div style={{ flex: '1' }}>
+              <TextFilter
+                filteringText={filterText}
+                filteringPlaceholder="Find problems"
+                filteringAriaLabel="Filter problems"
+                onChange={({ detail }) => setFilterText(detail.filteringText)}
+              />
+            </div>
             
-  
-          </SpaceBetween>
+            {/* Right side - Filter selects */}
+            <div style={{ 
+              display: 'flex', 
+              gap: '8px',
+              marginLeft: '20px'
+            }}>
+              <div style={{ width: '150px' }}>
+                <Select
+                  selectedOption={starredOptions.find(option => option.value === starredFilter)}
+                  onChange={({ detail }) => setStarredFilter(detail.selectedOption.value)}
+                  options={starredOptions}
+                  placeholder="Starred"
+                />
+              </div>
+              
+              <div style={{ width: '150px' }}>
+                <Select
+                  selectedOption={difficultyOptions.find(option => option.value === difficultyFilter)}
+                  onChange={({ detail }) => setDifficultyFilter(detail.selectedOption.value)}
+                  options={difficultyOptions}
+                  placeholder="Difficulty"
+                />
+              </div>
+              
+              <div style={{ width: '150px' }}>
+                <Select
+                  selectedOption={notesOptions.find(option => option.value === notesFilter)}
+                  onChange={({ detail }) => setNotesFilter(detail.selectedOption.value)}
+                  options={notesOptions}
+                  placeholder="Notes"
+                />
+              </div>
+              
+              <div style={{ width: '150px' }}>
+                <Select
+                  selectedOption={levelOptions.find(option => option.value === levelFilter)}
+                  onChange={({ detail }) => setLevelFilter(detail.selectedOption.value)}
+                  options={levelOptions}
+                  placeholder="Level"
+                />
+              </div>
+            </div>
+          </div>
         </Box>
 
         {dsaData.map((topic, topicIndex) => {
@@ -662,10 +756,8 @@ const DSATracker = () => {
               {expandedTopics[topic.topic] && (
                 <SpaceBetween size="m">
                   {topic.subtopics.map((subtopic, subtopicIndex) => {
-                    // Filter questions based on search text
-                    const filteredQuestions = subtopic.questions.filter(q => 
-                      filterText ? q.name.toLowerCase().includes(filterText.toLowerCase()) : true
-                    );
+                    // Filter questions based on all filters
+                    const filteredQuestions = subtopic.questions.filter(applyFilters);
                     
                     // Calculate progress for this subtopic
                     const progress = calculateProgress(subtopic.questions);
@@ -731,6 +823,14 @@ const DSATracker = () => {
                               stripedRows
                               wrapLines={false}
                               fullWidth={true}
+                              empty={
+                                <Box textAlign="center" padding="l">
+                                  <b>No matching problems</b>
+                                  <Box padding={{ top: "s" }}>
+                                    Try adjusting your filters or search term
+                                  </Box>
+                                </Box>
+                              }
                             />
                           </>
                         )}
@@ -746,30 +846,30 @@ const DSATracker = () => {
 
       {/* Note Modal */}
       <Modal
-  visible={noteModalVisible}
-  onDismiss={() => setNoteModalVisible(false)}
-  header="Problem Notes"
-  footer={
-    <Box float="right">
-      <SpaceBetween direction="horizontal" size="xs">
-        <Button variant="link" onClick={() => setNoteModalVisible(false)}>
-          Cancel
-        </Button>
-        <Button variant="primary" onClick={saveNote}>
-          Save
-        </Button>
-      </SpaceBetween>
-    </Box>
-  }
-  size="large"
->
-  <EnhancedCodeEditor
-    value={currentNote}
-    onChange={value => setCurrentNote(value)}
-    language={selectedLanguage.value}
-    onLanguageChange={handleLanguageChange}
-  />
-</Modal>
+        visible={noteModalVisible}
+        onDismiss={() => setNoteModalVisible(false)}
+        header="Problem Notes"
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button variant="link" onClick={() => setNoteModalVisible(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={saveNote}>
+                Save
+              </Button>
+            </SpaceBetween>
+          </Box>
+        }
+        size="large"
+      >
+        <EnhancedCodeEditor
+          value={currentNote}
+          onChange={value => setCurrentNote(value)}
+          language={selectedLanguage.value}
+          onLanguageChange={handleLanguageChange}
+        />
+      </Modal>
     </Container>
   );
 };
