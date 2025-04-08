@@ -143,6 +143,11 @@ const DSATracker = () => {
     }));
   };
 
+  const handleLanguageChange = (selectedOption) => {
+    setSelectedLanguage(selectedOption);
+    // This will trigger the useEffect that saves to localStorage
+  };
+
   // Calculate progress for a subtopic
   const calculateProgress = (questions) => {
     if (questions.length === 0) return 0;
@@ -610,13 +615,7 @@ const DSATracker = () => {
               onChange={({ detail }) => setFilterText(detail.filteringText)}
             />
             
-            <Select
-              selectedOption={selectedLanguage}
-              onChange={({ detail }) => setSelectedLanguage(detail.selectedOption)}
-              options={languageOptions}
-              placeholder="Select language"
-              selectedAriaLabel="Selected"
-            />
+  
           </SpaceBetween>
         </Box>
 
@@ -747,29 +746,30 @@ const DSATracker = () => {
 
       {/* Note Modal */}
       <Modal
-        visible={noteModalVisible}
-        onDismiss={() => setNoteModalVisible(false)}
-        header="Problem Notes"
-        footer={
-          <Box float="right">
-            <SpaceBetween direction="horizontal" size="xs">
-              <Button variant="link" onClick={() => setNoteModalVisible(false)}>
-                Cancel
-              </Button>
-              <Button variant="primary" onClick={saveNote}>
-                Save
-              </Button>
-            </SpaceBetween>
-          </Box>
-        }
-        size="large"
-      >
-        <EnhancedCodeEditor
-          value={currentNote}
-          onChange={value => setCurrentNote(value)}
-          language={selectedLanguage.value} // Pass the selected language to the code editor
-        />
-      </Modal>
+  visible={noteModalVisible}
+  onDismiss={() => setNoteModalVisible(false)}
+  header="Problem Notes"
+  footer={
+    <Box float="right">
+      <SpaceBetween direction="horizontal" size="xs">
+        <Button variant="link" onClick={() => setNoteModalVisible(false)}>
+          Cancel
+        </Button>
+        <Button variant="primary" onClick={saveNote}>
+          Save
+        </Button>
+      </SpaceBetween>
+    </Box>
+  }
+  size="large"
+>
+  <EnhancedCodeEditor
+    value={currentNote}
+    onChange={value => setCurrentNote(value)}
+    language={selectedLanguage.value}
+    onLanguageChange={handleLanguageChange}
+  />
+</Modal>
     </Container>
   );
 };

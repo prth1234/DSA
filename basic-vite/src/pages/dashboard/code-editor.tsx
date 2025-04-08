@@ -1,13 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as monaco from 'monaco-editor';
 // Import required CSS
 import 'monaco-editor/min/vs/editor/editor.main.css';
 import Select from "@cloudscape-design/components/select";
 
-const CodeEditor = ({ value, onChange }) => {
+// Remove the internal language state and use only the prop
+const EnhancedCodeEditor = ({ value, onChange, language = 'javascript', onLanguageChange }) => {
   const editorRef = useRef(null);
   const containerRef = useRef(null);
-  const [language, setLanguage] = useState('javascript');
   
   // Available language options
   const languageOptions = [
@@ -21,6 +21,7 @@ const CodeEditor = ({ value, onChange }) => {
     { value: 'other', label: 'Other' }
   ];
 
+  // Initialize editor when component mounts or when language changes
   useEffect(() => {
     if (!containerRef.current) return;
     
@@ -44,32 +45,41 @@ const CodeEditor = ({ value, onChange }) => {
       }
     });
 
-    // Initialize Monaco Editor
-    editorRef.current = monaco.editor.create(containerRef.current, {
-      value: value || '',
-      language: language,
-      theme: 'transparentTheme',
-      fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-      fontSize: 14,
-      lineNumbers: 'on',
-      scrollBeyondLastLine: false,
-      minimap: { enabled: false }, // Disabled minimap/preview
-      automaticLayout: true,
-      tabSize: 2,
-      wordWrap: 'on',
-      formatOnPaste: true,
-      formatOnType: true,
-      autoClosingBrackets: 'always',
-      autoClosingQuotes: 'always',
-      matchBrackets: 'always'
-    });
+    // Initialize or update Monaco Editor
+    if (!editorRef.current) {
+      // Create new editor instance
+      editorRef.current = monaco.editor.create(containerRef.current, {
+        value: value || '',
+        language: language,
+        theme: 'transparentTheme',
+        fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+        fontSize: 14,
+        lineNumbers: 'on',
+        scrollBeyondLastLine: false,
+        minimap: { enabled: false },
+        automaticLayout: true,
+        tabSize: 2,
+        wordWrap: 'on',
+        formatOnPaste: true,
+        formatOnType: true,
+        autoClosingBrackets: 'always',
+        autoClosingQuotes: 'always',
+        matchBrackets: 'always'
+      });
 
-    // Handle changes
-    editorRef.current.onDidChangeModelContent(() => {
-      if (onChange) {
-        onChange(editorRef.current.getValue());
+      // Set up change handler
+      editorRef.current.onDidChangeModelContent(() => {
+        if (onChange) {
+          onChange(editorRef.current.getValue());
+        }
+      });
+    } else {
+      // Just update the language if editor already exists
+      const model = editorRef.current.getModel();
+      if (model) {
+        monaco.editor.setModelLanguage(model, language);
       }
-    });
+    }
 
     // Resize editor when window resizes
     const resizeEditor = () => {
@@ -83,10 +93,14 @@ const CodeEditor = ({ value, onChange }) => {
     return () => {
       window.removeEventListener('resize', resizeEditor);
       if (editorRef.current) {
-        editorRef.current.dispose();
+        // Don't dispose on language change, just when component unmounts
+        if (!containerRef.current) {
+          editorRef.current.dispose();
+          editorRef.current = null;
+        }
       }
     };
-  }, [language]);
+  }, [language]); // Only re-run if language changes
 
   // Update value when prop changes
   useEffect(() => {
@@ -95,42 +109,26 @@ const CodeEditor = ({ value, onChange }) => {
     }
   }, [value]);
 
-  // Handle language change
-  const handleLanguageChange = (selectedOption) => {
-    const newLanguage = selectedOption.value;
-    setLanguage(newLanguage);
-
-    if (editorRef.current) {
-      const model = editorRef.current.getModel();
-      if (model) {
-        monaco.editor.setModelLanguage(model, newLanguage);
-      }
+  // Handle language change from dropdown
+  const handleLanguageChange = ({ detail }) => {
+    if (onLanguageChange) {
+      onLanguageChange(detail.selectedOption);
     }
   };
 
   return (
     <div className="code-editor-wrapper">
-    <div className="language-selector">
-    <div className="language-selector">
-  <div style={{ minWidth: '120px', maxWidth: '150px' }}>
-    <Select
-      selectedOption={languageOptions.find(option => option.value === language)}
-      onChange={({ detail }) => {
-        setLanguage(detail.selectedOption.value);
-        if (editorRef.current) {
-          const model = editorRef.current.getModel();
-          if (model) {
-            monaco.editor.setModelLanguage(model, detail.selectedOption.value);
-          }
-        }
-      }}
-      options={languageOptions}
-      selectedAriaLabel="Selected language"
-      placeholder="Select language"
-    />
-  </div>
-</div>
-</div>
+      <div className="language-selector">
+        <div style={{ minWidth: '120px', maxWidth: '150px' }}>
+          <Select
+            selectedOption={languageOptions.find(option => option.value === language) || languageOptions[0]}
+            onChange={handleLanguageChange}
+            options={languageOptions}
+            selectedAriaLabel="Selected language"
+            placeholder="Select language"
+          />
+        </div>
+      </div>
       <div ref={containerRef} className="monaco-editor-container"></div>
       <style jsx>{`
         .code-editor-wrapper {
@@ -164,4 +162,4 @@ const CodeEditor = ({ value, onChange }) => {
   );
 };
 
-export default CodeEditor;
+export default EnhancedCodeEditor;
