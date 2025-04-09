@@ -1,56 +1,32 @@
-// components/FilterSection.jsx
 import React from "react";
-import { Box, TextFilter, Select } from "@cloudscape-design/components";
+import { Box, TextFilter, Button } from "@cloudscape-design/components";
+import { FaStar } from "react-icons/fa";
+import { GoFileCode } from "react-icons/go";
 
 const FilterSection = ({ 
   filterText, 
   setFilterText,
-  starredFilter,
-  setStarredFilter,
-  difficultyFilter,
-  setDifficultyFilter,
-  notesFilter,
-  setNotesFilter,
-  levelFilter,
-  setLevelFilter 
+  activeFilters,
+  toggleFilter
 }) => {
-  // Filter options
-  const starredOptions = [
-    { value: "all", label: "All Problems" },
-    { value: "starred", label: "Starred Only" },
-  ];
-
-  const difficultyOptions = [
-    { value: "all", label: "All Difficulties" },
-    { value: "Easy", label: "Easy" },
-    { value: "Medium", label: "Medium" },
-    { value: "Hard", label: "Hard" },
-  ];
-
-  const notesOptions = [
-    { value: "all", label: "All Notes" },
-    { value: "with-notes", label: "With Notes" },
-    { value: "without-notes", label: "Without Notes" },
-  ];
-
-  const levelOptions = [
-    { value: "all", label: "All Levels" },
-    { value: "L1", label: "Level 1" },
-    { value: "L2", label: "Level 2" },
-    { value: "L3", label: "Level 3" },
-    { value: "L4", label: "Level 4" },
-  ];
+  // Button styles for filters
+  const getButtonStyle = (filterKey, value) => {
+    const isActive = activeFilters[filterKey].includes(value);
+    return {
+      variant: isActive ? "primary" : "normal",
+    };
+  };
 
   return (
     <Box>
       <div style={{ 
         display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginBottom: '16px'
+        gap: '16px',
+        marginBottom: '16px',
+        alignItems: 'center'
       }}>
-        {/* Left side - Search box */}
-        <div style={{ flex: '1' }}>
+        {/* Search box */}
+        <div style={{ flexGrow: 1 }}>
           <TextFilter
             filteringText={filterText}
             filteringPlaceholder="Find problems"
@@ -59,47 +35,67 @@ const FilterSection = ({
           />
         </div>
         
-        {/* Right side - Filter selects */}
+        {/* Filter buttons all in one row */}
         <div style={{ 
           display: 'flex', 
           gap: '8px',
-          marginLeft: '20px'
+          flexWrap: 'wrap',
+          alignItems: 'center'
         }}>
-          <div style={{ width: '150px' }}>
-            <Select
-              selectedOption={starredOptions.find(option => option.value === starredFilter)}
-              onChange={({ detail }) => setStarredFilter(detail.selectedOption.value)}
-              options={starredOptions}
-              placeholder="Starred"
-            />
-          </div>
-          
-          <div style={{ width: '150px' }}>
-            <Select
-              selectedOption={difficultyOptions.find(option => option.value === difficultyFilter)}
-              onChange={({ detail }) => setDifficultyFilter(detail.selectedOption.value)}
-              options={difficultyOptions}
-              placeholder="Difficulty"
-            />
-          </div>
-          
-          <div style={{ width: '150px' }}>
-            <Select
-              selectedOption={notesOptions.find(option => option.value === notesFilter)}
-              onChange={({ detail }) => setNotesFilter(detail.selectedOption.value)}
-              options={notesOptions}
-              placeholder="Notes"
-            />
-          </div>
-          
-          <div style={{ width: '150px' }}>
-            <Select
-              selectedOption={levelOptions.find(option => option.value === levelFilter)}
-              onChange={({ detail }) => setLevelFilter(detail.selectedOption.value)}
-              options={levelOptions}
-              placeholder="Level"
-            />
-          </div>
+          <Button 
+            {...getButtonStyle('difficulty', 'Easy')}
+            onClick={() => toggleFilter('difficulty', 'Easy')}
+          >
+            Easy
+          </Button>
+          <Button 
+            {...getButtonStyle('difficulty', 'Medium')}
+            onClick={() => toggleFilter('difficulty', 'Medium')}
+          >
+            Medium
+          </Button>
+          <Button 
+            {...getButtonStyle('difficulty', 'Hard')}
+            onClick={() => toggleFilter('difficulty', 'Hard')}
+          >
+            Hard
+          </Button>
+          <Button 
+            {...getButtonStyle('level', 'L1')}
+            onClick={() => toggleFilter('level', 'L1')}
+          >
+            L1
+          </Button>
+          <Button 
+            {...getButtonStyle('level', 'L2')}
+            onClick={() => toggleFilter('level', 'L2')}
+          >
+            L2
+          </Button>
+          <Button 
+            {...getButtonStyle('level', 'L3')}
+            onClick={() => toggleFilter('level', 'L3')}
+          >
+            L3
+          </Button>
+          <Button 
+            {...getButtonStyle('level', 'L4')}
+            onClick={() => toggleFilter('level', 'L4')}
+          >
+            L4
+          </Button>
+          <Button 
+            {...getButtonStyle('notes', 'with-notes')}
+            onClick={() => toggleFilter('notes', 'with-notes')}
+          >
+            With Notes
+          </Button>
+          <Button 
+            {...getButtonStyle('starred', 'starred')}
+            onClick={() => toggleFilter('starred', 'starred')}
+          >
+            Starred
+          </Button>
         </div>
       </div>
     </Box>
