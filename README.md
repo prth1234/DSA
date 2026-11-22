@@ -2,6 +2,13 @@
   <img src="docs/assets/hero.svg" alt="DSA - Interactive Algorithms and Problem Tracker" width="100%"/>
 </div>
 
+<p align="center">
+  <a href="#architecture--data-flow">Architecture</a> &middot;
+  <a href="#features">Features</a> &middot;
+  <a href="#getting-started">Getting Started</a> &middot;
+  <a href="#repository-structure">Structure</a>
+</p>
+
 A TypeScript and React workspace for tracking Data Structures &amp; Algorithms (DSA) practice, organizing problems by topic and subtopic, filtering by difficulty and revision state, and writing solutions in an embedded Monaco code editor with local persistence.
 
 ---
@@ -25,7 +32,36 @@ A TypeScript and React workspace for tracking Data Structures &amp; Algorithms (
 
 ---
 
+## Getting Started
+
+```bash
+git clone https://github.com/prth1234/DSA.git
+cd DSA/basic-vite
+npm install
+npm run dev
+```
+
+<details>
+<summary><strong>Prerequisites &amp; Available Scripts (<code>basic-vite</code>)</strong></summary>
+
+- **Prerequisites**: Node.js 18+ and npm
+
+| Script | Command | Description |
+| :--- | :--- | :--- |
+| Dev server | `npm run dev` | Start Vite local development server |
+| Type-check &amp; build | `npm run build` | Run `tsc` and build production bundle with Vite |
+| Preview | `npm run preview` | Preview production build locally |
+| Lint | `npm run lint` | Run ESLint across `.ts` and `.tsx` files |
+| Format | `npm run format` | Format source files with Prettier |
+
+</details>
+
+---
+
 ## Repository Structure
+
+<details>
+<summary><strong>Workspace Directory Tree</strong></summary>
 
 ```text
 DSA/
@@ -46,41 +82,7 @@ DSA/
 └── LICENSE                            # MIT No Attribution
 ```
 
----
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ and npm
-
-### Run the DSA Workspace (`basic-vite`)
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/prth1234/DSA.git
-   cd DSA/basic-vite
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the Vite development server:
-   ```bash
-   npm run dev
-   ```
-
-### Available Scripts (`basic-vite`)
-
-| Script | Command | Description |
-| :--- | :--- | :--- |
-| Dev server | `npm run dev` | Start Vite local development server |
-| Type-check &amp; build | `npm run build` | Run `tsc` and build production bundle with Vite |
-| Preview | `npm run preview` | Preview production build locally |
-| Lint | `npm run lint` | Run ESLint across `.ts` and `.tsx` files |
-| Format | `npm run format` | Format source files with Prettier |
+</details>
 
 ---
 
