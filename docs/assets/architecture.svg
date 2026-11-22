@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 280" width="100%" role="img" aria-labelledby="dsa-arch-title dsa-arch-desc">
+  <title id="dsa-arch-title">DSA Workspace Architecture</title>
+  <desc id="dsa-arch-desc">Component and state flow across Topic Store, Filter Engine, Question Table, and Monaco Code Editor with localStorage persistence.</desc>
+  <defs>
+    <marker id="dsa-arch-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#65A30D"/>
+    </marker>
+    <style>
+      .dsa-a-title { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 17px; font-weight: 700; fill: #F8FAFC; }
+      .dsa-a-body { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13px; fill: #CBD5E1; }
+      .dsa-a-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12.5px; fill: #A3E635; }
+      .dsa-a-box { fill: none; stroke: #334155; stroke-width: 1.25; }
+      .dsa-a-box-accent { fill: none; stroke: #65A30D; stroke-width: 1.5; }
+      .dsa-a-conn { fill: none; stroke: #65A30D; stroke-width: 1.5; marker-end: url(#dsa-arch-arrow); }
+      .dsa-a-conn-dash { fill: none; stroke: #64748B; stroke-width: 1.25; stroke-dasharray: 4 4; marker-end: url(#dsa-arch-arrow); }
+      @media (prefers-color-scheme: light) {
+        .dsa-a-title { fill: #0F172A; }
+        .dsa-a-body { fill: #475569; }
+        .dsa-a-mono { fill: #4D7C0F; }
+        .dsa-a-box { stroke: #CBD5E1; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; }
+      }
+    </style>
+  </defs>
+
+  <!-- Stage 1: Topic & Subtopic Data -->
+  <g transform="translate(20, 24)">
+    <rect x="0" y="0" width="190" height="136" rx="2" class="dsa-a-box"/>
+    <text x="14" y="28" class="dsa-a-title">Topic Store</text>
+    <text x="14" y="50" class="dsa-a-mono">mock-dsa-data.json</text>
+    <text x="14" y="76" class="dsa-a-body">Topics &amp; Subtopics</text>
+    <text x="14" y="96" class="dsa-a-body">Problem &amp; Video Links</text>
+    <text x="14" y="116" class="dsa-a-body">Difficulty &amp; Level Tags</text>
+  </g>
+
+  <line x1="210" y1="92" x2="246" y2="92" class="dsa-a-conn"/>
+
+  <!-- Stage 2: Filter Engine -->
+  <g transform="translate(248, 24)">
+    <rect x="0" y="0" width="196" height="136" rx="2" class="dsa-a-box"/>
+    <text x="14" y="28" class="dsa-a-title">FilterEngine</text>
+    <text x="14" y="50" class="dsa-a-mono">FilterSection.tsx</text>
+    <text x="14" y="76" class="dsa-a-body">Text Search Query</text>
+    <text x="14" y="96" class="dsa-a-body">Difficulty: Easy/Med/Hard</text>
+    <text x="14" y="116" class="dsa-a-body">Starred, Notes, L1-L4</text>
+  </g>
+
+  <line x1="444" y1="92" x2="480" y2="92" class="dsa-a-conn"/>
+
+  <!-- Stage 3: Tracker UI -->
+  <g transform="translate(482, 24)">
+    <rect x="0" y="0" width="190" height="136" rx="2" class="dsa-a-box"/>
+    <text x="14" y="28" class="dsa-a-title">Tracker UI</text>
+    <text x="14" y="50" class="dsa-a-mono">QuestionTable.tsx</text>
+    <text x="14" y="76" class="dsa-a-body">Cloudscape Table</text>
+    <text x="14" y="96" class="dsa-a-body">ProgressBar &amp; Stats</text>
+    <text x="14" y="116" class="dsa-a-body">Completion Rate %</text>
+  </g>
+
+  <line x1="672" y1="92" x2="708" y2="92" class="dsa-a-conn"/>
+
+  <!-- Stage 4: Monaco Editor -->
+  <g transform="translate(710, 24)">
+    <rect x="0" y="0" width="170" height="136" rx="2" class="dsa-a-box-accent"/>
+    <text x="14" y="28" class="dsa-a-title">Code Editor</text>
+    <text x="14" y="50" class="dsa-a-mono">code-editor.tsx</text>
+    <text x="14" y="76" class="dsa-a-body">Monaco Instance</text>
+    <text x="14" y="96" class="dsa-a-body">8 Language Modes</text>
+    <text x="14" y="116" class="dsa-a-body">Per-Problem Notes</text>
+  </g>
+
+  <!-- Persistence Layer -->
+  <g transform="translate(248, 194)">
+    <rect x="0" y="0" width="632" height="62" rx="2" class="dsa-a-box"/>
+    <text x="16" y="26" class="dsa-a-title">Browser Persistence Layer</text>
+    <text x="16" y="46" class="dsa-a-mono">useLocalStorage.tsx  |  status, starred, notes, saved code, language preference</text>
+  </g>
+
+  <line x1="577" y1="160" x2="577" y2="192" class="dsa-a-conn-dash"/>
+  <line x1="795" y1="160" x2="795" y2="192" class="dsa-a-conn-dash"/>
+</svg>

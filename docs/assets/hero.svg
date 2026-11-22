@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" width="100%" role="img" aria-labelledby="dsa-hero-title dsa-hero-desc">
+  <title id="dsa-hero-title">DSA - Interactive Algorithms and Problem Tracker</title>
+  <desc id="dsa-hero-desc">Hero banner for the DSA TypeScript, React, Cloudscape, and Monaco Editor workspace.</desc>
+  <defs>
+    <style>
+      .dsa-h-display { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 48px; font-weight: 800; fill: #F8FAFC; letter-spacing: -0.02em; }
+      .dsa-h-sub { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 17px; font-weight: 500; fill: #CBD5E1; }
+      .dsa-h-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12.5px; font-weight: 600; fill: #A3E635; }
+      .dsa-h-chip-txt { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12.5px; font-weight: 500; fill: #E2E8F0; }
+      .dsa-h-box { fill: none; stroke: #334155; stroke-width: 1.25; }
+      .dsa-h-accent-box { fill: none; stroke: #65A30D; stroke-width: 1.5; }
+      .dsa-h-edge { fill: none; stroke: #475569; stroke-width: 1.25; }
+      .dsa-h-node { fill: none; stroke: #A3E635; stroke-width: 1.5; }
+      .dsa-h-node-dim { fill: none; stroke: #475569; stroke-width: 1.25; }
+      .dsa-h-pulse { animation: dsaHeroPulse 2.8s ease-in-out infinite; }
+      @keyframes dsaHeroPulse {
+        0%, 100% { stroke-opacity: 1; }
+        50% { stroke-opacity: 0.35; }
+      }
+      @media (prefers-color-scheme: light) {
+        .dsa-h-display { fill: #0F172A; }
+        .dsa-h-sub { fill: #475569; }
+        .dsa-h-mono { fill: #4D7C0F; }
+        .dsa-h-chip-txt { fill: #1E293B; }
+        .dsa-h-box { stroke: #CBD5E1; }
+        .dsa-h-accent-box { stroke: #65A30D; }
+        .dsa-h-edge { stroke: #94A3B8; }
+        .dsa-h-node { stroke: #4D7C0F; }
+        .dsa-h-node-dim { stroke: #94A3B8; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .dsa-h-pulse { animation: none !important; }
+      }
+    </style>
+  </defs>
+
+  <!-- Left: Typography & Stack Chips -->
+  <g transform="translate(24, 34)">
+    <rect x="0" y="0" width="164" height="26" rx="2" class="dsa-h-accent-box"/>
+    <text x="12" y="17.5" class="dsa-h-mono">TS / REACT / MONACO</text>
+
+    <text x="0" y="88" class="dsa-h-display">DSA</text>
+    <text x="0" y="118" class="dsa-h-sub">Algorithmic Problem Tracker &amp; In-Browser Practice Workspace</text>
+
+    <!-- Stack Chips -->
+    <g transform="translate(0, 146)">
+      <rect x="0" y="0" width="106" height="30" rx="2" class="dsa-h-box"/>
+      <text x="53" y="19.5" text-anchor="middle" class="dsa-h-chip-txt">TypeScript</text>
+
+      <rect x="116" y="0" width="88" height="30" rx="2" class="dsa-h-box"/>
+      <text x="160" y="19.5" text-anchor="middle" class="dsa-h-chip-txt">React 18</text>
+
+      <rect x="214" y="0" width="124" height="30" rx="2" class="dsa-h-box"/>
+      <text x="276" y="19.5" text-anchor="middle" class="dsa-h-chip-txt">Monaco Editor</text>
+
+      <rect x="348" y="0" width="112" height="30" rx="2" class="dsa-h-box"/>
+      <text x="404" y="19.5" text-anchor="middle" class="dsa-h-chip-txt">Cloudscape</text>
+
+      <rect x="470" y="0" width="76" height="30" rx="2" class="dsa-h-box"/>
+      <text x="508" y="19.5" text-anchor="middle" class="dsa-h-chip-txt">Vite 5</text>
+    </g>
+  </g>
+
+  <!-- Right: Geometric Binary Tree / Complexity Motif -->
+  <g transform="translate(620, 32)">
+    <!-- Edges -->
+    <line x1="128" y1="34" x2="64" y2="92" class="dsa-h-edge"/>
+    <line x1="128" y1="34" x2="192" y2="92" class="dsa-h-edge"/>
+    <line x1="64" y1="92" x2="32" y2="150" class="dsa-h-edge"/>
+    <line x1="64" y1="92" x2="96" y2="150" class="dsa-h-edge"/>
+    <line x1="192" y1="92" x2="160" y2="150" class="dsa-h-edge"/>
+    <line x1="192" y1="92" x2="224" y2="150" class="dsa-h-edge"/>
+
+    <!-- Root Node -->
+    <rect x="104" y="14" width="48" height="28" rx="2" class="dsa-h-node dsa-h-pulse"/>
+    <text x="128" y="32.5" text-anchor="middle" class="dsa-h-mono">O(1)</text>
+
+    <!-- Level 1 Nodes -->
+    <rect x="38" y="78" width="52" height="28" rx="2" class="dsa-h-node"/>
+    <text x="64" y="96.5" text-anchor="middle" class="dsa-h-mono">log n</text>
+
+    <rect x="166" y="78" width="52" height="28" rx="2" class="dsa-h-node-dim"/>
+    <text x="192" y="96.5" text-anchor="middle" class="dsa-h-chip-txt">O(n)</text>
+
+    <!-- Level 2 Nodes -->
+    <rect x="10" y="144" width="44" height="26" rx="0" class="dsa-h-node-dim"/>
+    <text x="32" y="161.5" text-anchor="middle" class="dsa-h-chip-txt">L1</text>
+
+    <rect x="74" y="144" width="44" height="26" rx="0" class="dsa-h-node dsa-h-pulse"/>
+    <text x="96" y="161.5" text-anchor="middle" class="dsa-h-mono">L2</text>
+
+    <rect x="138" y="144" width="44" height="26" rx="0" class="dsa-h-node-dim"/>
+    <text x="160" y="161.5" text-anchor="middle" class="dsa-h-chip-txt">L3</text>
+
+    <rect x="202" y="144" width="44" height="26" rx="0" class="dsa-h-node-dim"/>
+    <text x="224" y="161.5" text-anchor="middle" class="dsa-h-chip-txt">L4</text>
+
+    <!-- Index Array Strip -->
+    <g transform="translate(10, 186)">
+      <rect x="0" y="0" width="48" height="24" rx="0" class="dsa-h-box"/>
+      <text x="24" y="16.5" text-anchor="middle" class="dsa-h-chip-txt">[0]</text>
+      <rect x="48" y="0" width="48" height="24" rx="0" class="dsa-h-box"/>
+      <text x="72" y="16.5" text-anchor="middle" class="dsa-h-chip-txt">[1]</text>
+      <rect x="96" y="0" width="48" height="24" rx="0" class="dsa-h-accent-box"/>
+      <text x="120" y="16.5" text-anchor="middle" class="dsa-h-mono">[2]</text>
+      <rect x="144" y="0" width="48" height="24" rx="0" class="dsa-h-box"/>
+      <text x="168" y="16.5" text-anchor="middle" class="dsa-h-chip-txt">[3]</text>
+      <rect x="192" y="0" width="48" height="24" rx="0" class="dsa-h-box"/>
+      <text x="216" y="16.5" text-anchor="middle" class="dsa-h-chip-txt">[4]</text>
+    </g>
+  </g>
+</svg>
